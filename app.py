@@ -1,7 +1,7 @@
 import streamlit as st
 from agent import run_agent
 
-st.title("LinkedIn AI Agent")
+st.title("LinkedIn AI Agent v4")
 
 model = st.selectbox(
     "Choose Model",
@@ -14,15 +14,19 @@ model = st.selectbox(
 
 user_input = st.text_area("What did you learn today?")
 
-if st.button("Generate"):
+if st.button("Generate Post"):
+
     if not user_input.strip():
         st.warning("Please enter something first.")
     else:
-        with st.spinner("Thinking... 🤖"):
-            step1, final = run_agent(user_input, model)
+        with st.spinner("Generating... 🤖"):
+            extracted, critique, final_post = run_agent(user_input, model)
 
-        st.subheader("Step 1: Extracted Insights")
-        st.write(step1)
+        st.subheader("🧠 Extracted Insights")
+        st.write(extracted)
 
-        st.subheader("Final LinkedIn Post")
-        st.write(final)
+        st.subheader("🎯 Writing Guidance (Critic)")
+        st.write(critique)
+
+        st.subheader("📝 Final LinkedIn Post")
+        st.write(final_post)
