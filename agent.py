@@ -1,5 +1,5 @@
 from llm import call_model
-from memory import log_to_dataset
+from memory import save_example
 
 
 # 1. Extractor
@@ -91,6 +91,6 @@ def run_agent(user_input, model):
     critique = critique_extraction(user_input, extracted, model)
     final_post = generate_linkedin_post(extracted, critique, model)
 
-    log_to_dataset(user_input, extracted, critique, final_post, model)
+    save_example(user_input, extracted, critique, final_post, model)
 
     return extracted, critique, final_post
