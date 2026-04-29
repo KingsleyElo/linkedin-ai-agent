@@ -15,13 +15,14 @@ model = st.selectbox(
 user_input = st.text_area("What did you learn today?")
 
 if st.button("Generate"):
-    step1, step2, final = run_agent(user_input, model)
+    if not user_input.strip():
+        st.warning("Please enter something first.")
+    else:
+        with st.spinner("Thinking... 🤖"):
+            step1, final = run_agent(user_input, model)
 
-    st.write("### Step 1")
-    st.write(step1)
+        st.subheader("Step 1: Extracted Insights")
+        st.write(step1)
 
-    st.write("### Step 2")
-    st.write(step2)
-
-    st.write("### Final Post")
-    st.write(final)
+        st.subheader("Final LinkedIn Post")
+        st.write(final)
