@@ -79,12 +79,12 @@ def generate_linkedin_post(extracted, critique, model):
         {
             "role": "user",
             "content": f"""
-EXTRACTED INSIGHTS:
-{extracted}
+            EXTRACTED INSIGHTS:
+            {extracted}
 
-WRITING GUIDANCE:
-{critique}
-"""
+            WRITING GUIDANCE:
+            {critique}
+            """
         }
     ]
 
