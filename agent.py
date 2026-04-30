@@ -68,6 +68,9 @@ def generate_linkedin_post(extracted, critique, model):
                 "- Short paragraphs\n"
                 "- Keep technical accuracy\n"
                 "- Do NOT invent facts\n"
+                "- Avoid repeating the same idea\n"
+                "- Keep the post under 200 words\n"
+                "- Focus on ONE core insight\n"
             )
         },
         {
