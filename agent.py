@@ -71,6 +71,9 @@ def generate_linkedin_post(extracted, critique, model):
                 "- Avoid repeating the same idea\n"
                 "- Keep the post under 200 words\n"
                 "- Focus on ONE core insight\n"
+                "- Write in first person\n"
+                "- Lead with the most surprising or specific number\n"
+                "- Make it feel like a personal lesson, not a report\n"
             )
         },
         {

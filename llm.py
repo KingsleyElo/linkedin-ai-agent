@@ -7,9 +7,11 @@ def call_model(messages, model):
     if model.startswith("openrouter/"):
         client = OpenAI(
             api_key=os.getenv("OPENROUTER_API_KEY"),
-            base_url=os.getenv("OPENROUTER_BASE_URL")
+            base_url=os.getenv("OPENROUTER_BASE_URL"),
+            default_headers={
+                "HTTP-Referer": "https://linkedin-ai-agent-s9iq2hcbtdx2bfs92fvkyr.streamlit.app/",
+            }
         )
-
         model_name = model.replace("openrouter/", "")
 
     else:
