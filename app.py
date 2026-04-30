@@ -7,8 +7,8 @@ model = st.selectbox(
     "Choose Model",
     [
         "llama-3.3-70b-versatile",  # Groq
-        "openrouter/mistralai/mistral-7b-instruct:free",
-        "openrouter/google/gemma-2-9b-it:free"
+        "nvidia/nemotron-3-super-120b-a12b:free",
+        "openai/gpt-oss-120b:free"
     ]
 )
 
