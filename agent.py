@@ -42,12 +42,12 @@ def critique_extraction(original_input, extracted_output, model):
         {
             "role": "user",
             "content": f"""
-ORIGINAL INPUT:
-{original_input}
+            ORIGINAL INPUT:
+            {original_input}
 
-EXTRACTED OUTPUT:
-{extracted_output}
-"""
+            EXTRACTED OUTPUT:
+            {extracted_output}
+            """
         }
     ]
 
