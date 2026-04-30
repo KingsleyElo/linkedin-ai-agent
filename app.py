@@ -6,9 +6,10 @@ st.title("LinkedIn AI Agent v4")
 model = st.selectbox(
     "Choose Model",
     [
-        "llama-3.3-70b-versatile",  # Groq
-        "nvidia/nemotron-3-super-120b-a12b:free",
-        "openai/gpt-oss-120b:free"
+        "llama-3.3-70b-versatile",
+        "openrouter/nvidia/nemotron-3-super-120b-a12b:free",
+        "openrouter/openai/gpt-oss-120b:free",
+        "openrouter/google/gemma-4-31b-it:free",
     ]
 )
 
