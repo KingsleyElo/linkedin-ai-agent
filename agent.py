@@ -31,7 +31,7 @@ def critique_extraction(original_input, extracted_output, model):
         {
             "role": "system",
             "content": (
-                "You are a content improvement advisor.\n\n"
+                "You are a linked content improvement advisor.\n\n"
                 "Your job is to guide writing, not evaluate.\n\n"
                 "OUTPUT:\n"
                 "POST GUIDANCE:\n- what to emphasize\n- what to clarify\n\n"
