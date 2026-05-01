@@ -15,6 +15,8 @@ def observe_input(user_input, model):
                 "KEY INSIGHT: The single most compelling fact or lesson\n"
                 "AUDIENCE HOOK: Why would a recruiter or ML peer care?\n"
                 "TONE: technical, storytelling, or reflective?\n"
+                "Only use facts explicitly stated in the user input\n"
+                "Do NOT invent figures, project names, or details not mentioned\n"
             )
         },
         {"role": "user", "content": user_input}
@@ -26,7 +28,7 @@ def observe_input(user_input, model):
 def reason(observation, failed_rules, model):
     failed_section = (
         f"\nPREVIOUS ATTEMPT FAILED THESE RULES:\n{failed_rules}\n"
-        "Think carefully about how to fix each one before writing."
+        "Think carefully about how to fix each one before writing, but put the observations in mind while doing so."
         if failed_rules else
         "This is the first attempt. Plan how to write the best possible post based on the observation."
     )
@@ -35,7 +37,18 @@ def reason(observation, failed_rules, model):
             "role": "system",
             "content": (
                 "You are a LinkedIn writing strategist.\n"
-                "Your job is to reason about how to write the post based on the observation BEFORE writing it.\n\n"
+                "Your job is to reason about how to write the post based on the observation BEFORE writing it.\n"
+                "Only use facts explicitly stated in the user input\n"
+                "Do NOT invent figures, project names, or details not mentioned\n\n"
+                "You must reason within these post rules:\n"
+                "- Lead with the most specific number or surprising fact\n"
+                "- Write in first person\n"
+                "- No headers\n"
+                "- Short paragraphs\n"
+                "- Under 200 words\n"
+                "- Focus on ONE core insight\n"
+                "- End with a call to action or thought-provoking question\n"
+                "- Include 3-5 relevant hashtags at the end\n\n"
                 "OUTPUT:\n"
                 "THOUGHT: Your step-by-step reasoning about how to approach the post\n"
                 "PLAN: Specific decisions — what the hook will be, what to emphasize, tone\n"
@@ -64,6 +77,10 @@ def generate_post(observation, thought, model):
                 "- Under 200 words\n"
                 "- Focus on ONE core insight\n"
                 "- End with a lesson or question\n"
+                "- Only use facts explicitly stated in the user input\n"
+                "- Do NOT invent figures, project names, or details not mentioned\n"
+                "- End with a call to action or thought-provoking question\n"
+                "- Include 3-5 relevant hashtags at the end\n"
             )
         },
         {
@@ -83,8 +100,10 @@ def observe_output(post):
         "under_200_words": len(post.split()) < 200,
         "starts_with_number": post.strip()[0].isdigit(),
         "first_person": "I " in post,
-        "no_headers": "#" not in post,
+        "no_headers": not any(line.startswith("#") for line in post.split("\n")),
         "no_bullet_points": "- " not in post and "* " not in post,
+        "has_call_to_action": "?" in post,
+        "has_hashtags": "#" in post.split("\n")[-1],
     }
     passed = all(checks.values())
     failed = [rule for rule, ok in checks.items() if not ok]
