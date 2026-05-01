@@ -2,101 +2,124 @@ from llm import call_model
 from memory import save_example
 
 
-# 1. Extractor
-def extract_insights(user_input, model):
+# 1. Observe Input - understand the environment
+def observe_input(user_input, model):
     messages = [
         {
             "role": "system",
             "content": (
-                "Extract ONLY explicit information.\n"
-                "Do NOT assume structure.\n"
-                "Preserve:\n"
-                "- numbers\n"
-                "- names (datasets, tools, concepts)\n"
-                "- specific examples\n\n"
-                "Output:\n"
-                "FACTS:\n- ...\n"
-                "CONCEPTS:\n- ..."
+                "You are a LinkedIn content strategist.\n"
+                "Your audience is recruiters and ML/data peers.\n\n"
+                "Analyze the user input and extract:\n"
+                "INTENT: What is this post trying to communicate?\n"
+                "KEY INSIGHT: The single most compelling fact or lesson\n"
+                "AUDIENCE HOOK: Why would a recruiter or ML peer care?\n"
+                "TONE: technical, storytelling, or reflective?\n"
             )
         },
         {"role": "user", "content": user_input}
     ]
-
     return call_model(messages, model)
 
 
-# 2. Critic (NOW produces writing guidance)
-def critique_extraction(original_input, extracted_output, model):
+# 2. Reason - think about how to write the post
+def reason(observation, failed_rules, model):
+    failed_section = (
+        f"\nPREVIOUS ATTEMPT FAILED THESE RULES:\n{failed_rules}\n"
+        "Think carefully about how to fix each one before writing."
+        if failed_rules else
+        "This is the first attempt. Plan how to write the best possible post based on the observation."
+    )
     messages = [
         {
             "role": "system",
             "content": (
-                "You are a linkedin content improvement advisor.\n\n"
-                "Your job is to guide writing, not evaluate.\n\n"
+                "You are a LinkedIn writing strategist.\n"
+                "Your job is to reason about how to write the post based on the observation BEFORE writing it.\n\n"
                 "OUTPUT:\n"
-                "POST GUIDANCE:\n- what to emphasize\n- what to clarify\n\n"
-                "EMPHASIS POINTS:\n- key ideas that should be highlighted\n\n"
-                "TONE ADVICE:\n- how the post should feel (e.g. technical, storytelling, concise)\n"
+                "THOUGHT: Your step-by-step reasoning about how to approach the post\n"
+                "PLAN: Specific decisions — what the hook will be, what to emphasize, tone\n"
             )
         },
         {
             "role": "user",
-            "content": f"""
-            ORIGINAL INPUT:
-            {original_input}
-
-            EXTRACTED OUTPUT:
-            {extracted_output}
-            """
+            "content": f"OBSERVATION:\n{observation}{failed_section}"
         }
     ]
-
     return call_model(messages, model)
 
 
-# 3. Generator (uses BOTH signals)
-def generate_linkedin_post(extracted, critique, model):
+# 3. Act - generate the post based on reasoning
+def generate_post(observation, thought, model):
     messages = [
         {
             "role": "system",
             "content": (
-                "You are a LinkedIn content writer.\n"
-                "Write a high-quality post.\n\n"
+                "You are a LinkedIn content writer targeting recruiters and ML peers.\n\n"
                 "RULES:\n"
-                "- Strong hook\n"
+                "- Lead with the most specific number or surprising fact\n"
+                "- Write in first person\n"
                 "- No headers\n"
                 "- Short paragraphs\n"
-                "- Keep technical accuracy\n"
-                "- Do NOT invent facts\n"
-                "- Avoid repeating the same idea\n"
-                "- Keep the post under 200 words\n"
+                "- Under 200 words\n"
                 "- Focus on ONE core insight\n"
-                "- Write in first person\n"
-                "- Lead with the most surprising or specific number\n"
-                "- Make it feel like a personal lesson, not a report\n"
+                "- End with a lesson or question\n"
             )
         },
         {
             "role": "user",
-            "content": f"""
-            EXTRACTED INSIGHTS:
-            {extracted}
-
-            WRITING GUIDANCE:
-            {critique}
-            """
+            "content": (
+                f"OBSERVATION:\n{observation}\n\n"
+                f"REASONING & PLAN:\n{thought}"
+            )
         }
     ]
-
     return call_model(messages, model)
 
 
-# 4. Full pipeline
-def run_agent(user_input, model):
-    extracted = extract_insights(user_input, model)
-    critique = critique_extraction(user_input, extracted, model)
-    final_post = generate_linkedin_post(extracted, critique, model)
+# 4. Observe Output - Python rule checker (no LLM call)
+def observe_output(post):
+    checks = {
+        "under_200_words": len(post.split()) < 200,
+        "starts_with_number": post.strip()[0].isdigit(),
+        "first_person": "I " in post,
+        "no_headers": "#" not in post,
+        "no_bullet_points": "- " not in post and "* " not in post,
+    }
+    passed = all(checks.values())
+    failed = [rule for rule, ok in checks.items() if not ok]
+    return passed, failed
 
-    save_example(user_input, extracted, critique, final_post, model)
 
-    return extracted, critique, final_post
+# 5. Full ReAct loop
+def run_agent(user_input, model, max_retries=3):
+
+    # First observation
+    observation = observe_input(user_input, model)
+
+    failed_rules = []
+    thought = ""
+    post = ""
+
+    for attempt in range(max_retries):
+        print(f"\n--- Attempt {attempt + 1} ---")
+
+        # Reason about observation and any previous failures
+        thought = reason(observation, failed_rules, model)
+
+        # Act - generate post based on reasoning
+        post = generate_post(observation, thought, model)
+
+        # Observe output with Python tools
+        passed, failed_rules = observe_output(post)
+
+        print(f"Rules passed: {passed}")
+        if failed_rules:
+            print(f"Failed rules: {failed_rules}")
+
+        if passed:
+            print("✅ Post passed all rules.")
+            break
+
+    save_example(user_input, observation, thought, post, model)
+    return observation, thought, post

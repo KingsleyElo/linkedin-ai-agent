@@ -1,7 +1,7 @@
 import streamlit as st
 from agent import run_agent
 
-st.title("LinkedIn AI Agent v4")
+st.title("LinkedIn AI Agent v5")
 
 model = st.selectbox(
     "Choose Model",
@@ -9,7 +9,6 @@ model = st.selectbox(
         "llama-3.3-70b-versatile",
         "openrouter/nvidia/nemotron-3-super-120b-a12b:free",
         "openrouter/openai/gpt-oss-120b:free",
-        "openrouter/google/gemma-4-31b-it:free",
     ]
 )
 
@@ -20,14 +19,14 @@ if st.button("Generate Post"):
     if not user_input.strip():
         st.warning("Please enter something first.")
     else:
-        with st.spinner("Generating... 🤖"):
-            extracted, critique, final_post = run_agent(user_input, model)
+        with st.spinner("Running ReAct loop... 🤖"):
+            observation, thought, post = run_agent(user_input, model)
 
-        st.subheader("🧠 Extracted Insights")
-        st.write(extracted)
+        st.subheader("👁️ Observation")
+        st.write(observation)
 
-        st.subheader("🎯 Writing Guidance (Critic)")
-        st.write(critique)
+        st.subheader("🧠 Reasoning")
+        st.write(thought)
 
         st.subheader("📝 Final LinkedIn Post")
-        st.write(final_post)
+        st.write(post)
